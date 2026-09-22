@@ -1,5 +1,8 @@
 using JobApplication.Application.DTOs.Auth;
+using JobApplication.Application.Features.Auth.Command.Login;
+using JobApplication.Application.Features.Auth.Command.Register;
 using JobApplication.Application.Services;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,12 +18,17 @@ namespace JobApplication.API.Controllers
     public class AuthController : ApiControllerBase
     {
         private readonly IAuthService _auth;
+        private readonly IMediator _mediator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthController"/> class.
         /// </summary>
         /// <param name="auth">The authentication service application interface.</param>
-        public AuthController(IAuthService auth) => _auth = auth;
+        public AuthController(IAuthService auth, IMediator mediator)
+        {
+            _mediator = mediator;
+            _auth = auth;
+        }
 
         /// <summary>
         /// Registers a new user account as either a Candidate or Recruiter.
@@ -38,7 +46,8 @@ namespace JobApplication.API.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
-            var result = await _auth.RegisterAsync(dto);
+            //var result = await _auth.RegisterAsync(dto);
+            var result = await _mediator.Send(new RegisterCommand() { dto =  dto });
             return result.IsSuccess ? StatusCode(StatusCodes.Status201Created, result.Value) : ToError(result);
         }
 
@@ -58,7 +67,8 @@ namespace JobApplication.API.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            var result = await _auth.LoginAsync(dto);
+            //var result = await _auth.LoginAsync(dto);
+            var result = await _mediator.Send(new LoginCommand() { dto = dto });
             return result.IsSuccess ? Ok(result.Value) : ToError(result);
         }
     }

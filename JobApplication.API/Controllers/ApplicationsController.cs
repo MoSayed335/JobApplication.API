@@ -20,7 +20,7 @@ namespace JobApplication.API.Controllers
     [ApiController]
     public class ApplicationsController : ApiControllerBase
     {
-        private readonly IApplicationService _service;
+        //private readonly IApplicationService _service;
         private readonly IMediator _mediator;
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace JobApplication.API.Controllers
         /// <param name="service">The application domain service.</param>
         /// <param name="mediator">The MediatR mediator instance.</param>
         public ApplicationsController(IApplicationService service, IMediator mediator) {
-            _service = service;
+            //_service = service;
             _mediator = mediator;
         }
 

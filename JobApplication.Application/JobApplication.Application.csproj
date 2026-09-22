@@ -16,4 +16,8 @@
     <ProjectReference Include="..\JobApplication.Domain\JobApplication.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Auth\Quaries\" />
+  </ItemGroup>
+
 </Project>
