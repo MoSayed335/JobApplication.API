@@ -1,5 +1,4 @@
-﻿// Infrastructure/Auth/JwtTokenGenerator.cs
-using JobApplication.Application.Interfaces.Auth;
+﻿using JobApplication.Application.Interfaces.Auth;
 using JobApplication.Domain.Entities;
 using JobApplication.Infrastructure.Auth;
 using Microsoft.Extensions.Options;

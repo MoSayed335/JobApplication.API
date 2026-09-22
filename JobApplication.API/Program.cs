@@ -64,6 +64,12 @@ namespace JobApplication.API
             builder.Services.AddScoped<IJobRepository, JobRepository>();
             builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
+            //MediatR
+            builder.Services.AddMediatR(cfg =>
+                cfg.RegisterServicesFromAssembly(typeof(JobApplication.Application.AssemblyReference).Assembly));
+
+
+
             builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

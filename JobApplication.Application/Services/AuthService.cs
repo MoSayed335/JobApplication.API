@@ -35,7 +35,7 @@ namespace JobApplication.Application.Services
 
             if (dto.Role == UserRole.Candidate)
             {
-                var candidate = new Candidate { FullName = dto.FullName, Email = email }; // عدّل حسب الـ entity
+                var candidate = new Candidate { FullName = dto.FullName, Email = email };
                 await _users.InsertCandidateAsync(candidate);
                 await _users.SaveChangesAsync();
                 user.ProfileId = candidate.Id;
