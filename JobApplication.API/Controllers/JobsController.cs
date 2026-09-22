@@ -1,6 +1,9 @@
 using JobApplication.Application.DTOs;
+using JobApplication.Application.Features.Job.Command.CloseJob;
 using JobApplication.Application.Features.Job.Command.CreateJob;
+using JobApplication.Application.Features.Job.Command.UpdateJob;
 using JobApplication.Application.Features.Job.Quaries.GetAllJobs;
+using JobApplication.Application.Features.Job.Quaries.GetByIdJob;
 using JobApplication.Application.Interfaces;
 using JobApplication.Application.Services;
 using JobApplication.Domain.Entities;
@@ -17,7 +20,7 @@ namespace JobApplication.API.Controllers;
 [Route("api/[controller]")]
 public class JobsController : ApiControllerBase
 {
-    private readonly IJobService _service;
+    //private readonly IJobService _service;
     private readonly IMediator _mentor;
 
     /// <summary>
@@ -27,7 +30,7 @@ public class JobsController : ApiControllerBase
     /// <param name="mediator">The MediatR mediator instance.</param>
     public JobsController(IJobService service , IMediator mediator)
     {
-        _service = service;
+        //_service = service;
         _mentor = mediator;
     }
 
@@ -89,7 +92,8 @@ public class JobsController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(int id)
     {
-        var result = await _service.GetByIdAsync(id);
+        //var result = await _service.GetByIdAsync(id);
+        var result = await _mentor.Send(new GetByIdQuery() { id = id });
         return result.IsSuccess ? Ok(result.Value) : ToError(result);
     }
 
@@ -113,7 +117,8 @@ public class JobsController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, UpdateJobDto dto)
     {
-        var result = await _service.UpdateAsync(id, ProfileId, dto);
+        //var result = await _service.UpdateAsync(id, ProfileId, dto);
+        var result = await _mentor.Send(new UpdateJobCommand() { Id = id , recruiterId =ProfileId , dto = dto });
         return result.IsSuccess ? Ok(result.Value) : ToError(result);
     }
 
@@ -136,7 +141,8 @@ public class JobsController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Close(int id)
     {
-        var result = await _service.CloseAsync(id, ProfileId);
+        //var result = await _service.CloseAsync(id, ProfileId);
+        var result = await _mentor.Send(new CloseJobCommand() { Id =id , recruiterId = ProfileId});
         return result.IsSuccess ? Ok(result.Value) : ToError(result);
     }
 }

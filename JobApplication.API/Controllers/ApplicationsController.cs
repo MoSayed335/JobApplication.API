@@ -6,6 +6,9 @@ using JobApplication.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using JobApplication.Application.Features.Jobs.commend.CreateApplication;
+using JobApplication.Application.Features.Jobs.Quaries.GetAllQuary;
+using JobApplication.Application.Features.Jobs.commend.ReviewApplication;
 
 namespace JobApplication.API.Controllers
 {
@@ -50,7 +53,8 @@ namespace JobApplication.API.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Create(CreateApplicationDto dto)
         {
-            var result = await _service.CreateAsync(ProfileId, dto);
+            //var result = await _service.CreateAsync(ProfileId, dto);
+            var result = await _mediator.Send(new CreateApplicationCommand() { CandidateId = ProfileId , Dto =  dto });
             return result.IsSuccess
                 ? StatusCode(StatusCodes.Status201Created, result.Value)
                 : ToError(result);
@@ -77,9 +81,12 @@ namespace JobApplication.API.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetAll([FromQuery] int? jobId, [FromQuery] JobApplicationStatus? status)
         {
+            //var apps = User.IsInRole("Candidate")
+            //    ? await _service.GetAllAsync(jobId, ProfileId, null, status)
+            //    : await _service.GetAllAsync(jobId, null, ProfileId, status);
             var apps = User.IsInRole("Candidate")
-                ? await _service.GetAllAsync(jobId, ProfileId, null, status)
-                : await _service.GetAllAsync(jobId, null, ProfileId, status);
+                ? await _mediator.Send(new GetAllApplicationesQuary() { JobId = jobId , CandidateId = ProfileId, RecruiterId =null , status = status})
+                : await _mediator.Send(new GetAllApplicationesQuary() { JobId = jobId, CandidateId =null, RecruiterId = ProfileId, status = status });
             return Ok(apps);
         }
 
@@ -103,7 +110,8 @@ namespace JobApplication.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Review(int id, ReviewApplicationDto dto)
         {
-            var result = await _service.ReviewAsync(id,ProfileId ,dto);
+            //var result = await _service.ReviewAsync(id,ProfileId ,dto);
+            var result = await _mediator.Send(new ReviewApplicationCommand() { id = id, recruiterId=ProfileId ,dto = dto });
             return result.IsSuccess ? Ok(result.Value) : ToError(result);
         }
 
