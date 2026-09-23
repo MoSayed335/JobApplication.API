@@ -11,7 +11,15 @@ namespace JobApplication.Application.Features.Jobs.commend.Canceledapplication
      : IRequestHandler<CanceledapplicationCommand, Result<ApplicationResponseDto>>
     {
         private readonly IApplicationRepository _apps;
-        public CanceledapplicationCommandHandler(IApplicationRepository apps) { _apps = apps; }
+
+        private readonly INotificationService _notificationService;
+        private readonly IBackgroundJobScheduler _backgroundJobScheduler;
+        public CanceledapplicationCommandHandler(IApplicationRepository apps, INotificationService notificationService, IBackgroundJobScheduler backgroundJobScheduler)
+        {
+            _apps = apps;
+            _notificationService = notificationService;
+            _backgroundJobScheduler = backgroundJobScheduler;
+        }
         async Task<Result<ApplicationResponseDto>> IRequestHandler<CanceledapplicationCommand, Result<ApplicationResponseDto>>.Handle(CanceledapplicationCommand request, CancellationToken cancellationToken)
         {
             var app = await _apps.GetByIdAsync(request.id);
@@ -33,7 +41,11 @@ namespace JobApplication.Application.Features.Jobs.commend.Canceledapplication
             _apps.Update(app);
             await _apps.SaveChangesAsync();
 
-        return Result<ApplicationResponseDto>.Ok(Map(app));
+            _backgroundJobScheduler.Enqueue<INotificationService>(b => b.NotifyRecruiter(app.Id));
+
+            //_backgroundJobScheduler.Schedule<INotificationService>(b => b.NotifyRecruiter(app.Id), TimeSpan.FromMinutes(2) );
+
+            return Result<ApplicationResponseDto>.Ok(Map(app));
         }
         private static ApplicationResponseDto Map(JobCandidateApplication a) => new()
         {

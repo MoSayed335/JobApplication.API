@@ -16,6 +16,7 @@ namespace JobApplication.Application.Features.Jobs.commend.ReviewApplication
     {
         private readonly IApplicationRepository _apps;
         private readonly IJobRepository _jobs;
+        private readonly IBackgroundJobScheduler _backgroundJobScheduler;
 
         private static readonly Dictionary<JobApplicationStatus, JobApplicationStatus[]> AllowedTransitions = new()
         {
@@ -24,10 +25,11 @@ namespace JobApplication.Application.Features.Jobs.commend.ReviewApplication
             [JobApplicationStatus.Interview] = new[] { JobApplicationStatus.Accepted, JobApplicationStatus.Rejected },
         };
 
-        public ReviewApplicationCommandHandler(IApplicationRepository apps, IJobRepository jobs)
+        public ReviewApplicationCommandHandler(IApplicationRepository apps, IJobRepository jobs, IBackgroundJobScheduler backgroundJobScheduler)
         {
             _apps = apps;
             _jobs = jobs;
+            _backgroundJobScheduler = backgroundJobScheduler;
         }
 
         public async Task<Result<ApplicationResponseDto>> Handle(ReviewApplicationCommand request, CancellationToken cancellationToken)
@@ -49,6 +51,8 @@ namespace JobApplication.Application.Features.Jobs.commend.ReviewApplication
 
             _apps.Update(app);
             await _apps.SaveChangesAsync();
+
+            _backgroundJobScheduler.Schedule<INotificationService>(s => s.NotifyRecruiter(app.Id), TimeSpan.FromMinutes(2));
 
             return Result<ApplicationResponseDto>.Ok(Map(app));
         }

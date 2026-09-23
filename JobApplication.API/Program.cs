@@ -1,4 +1,5 @@
 
+using Hangfire;
 using JobApplication.Application.Interfaces;
 using JobApplication.Application.Interfaces.Auth;
 using JobApplication.Application.Services;
@@ -6,6 +7,7 @@ using JobApplication.Domain.Entities;
 using JobApplication.Infrastructure.Auth;
 using JobApplication.Infrastructure.Persistence;
 using JobApplication.Infrastructure.Repositories;
+using JobApplication.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +42,8 @@ namespace JobApplication.API
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
             builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+            builder.Services.AddScoped<IBackgroundJobScheduler, HangfireBackgroundJobScheduler>();
+            builder.Services.AddScoped<INotificationService, EmailNotificationService>();
 
             builder.Services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -72,6 +76,14 @@ namespace JobApplication.API
 
             builder.Services.AddControllers()
     .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+            //HangFire
+            builder.Services.AddHangfire(config => config
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseSqlServerStorage(
+                builder.Configuration.GetConnectionString("HangfireConnection")));
+
+            builder.Services.AddHangfireServer();
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
@@ -87,7 +99,9 @@ namespace JobApplication.API
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
-            app.UseAuthorization();    
+            app.UseAuthorization(); 
+            
+            app.UseHangfireDashboard("/hangfire");
             app.MapControllers();
 
             app.Run();
