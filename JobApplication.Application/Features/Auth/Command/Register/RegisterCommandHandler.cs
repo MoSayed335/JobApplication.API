@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.Common;
+using JobApplication.Application.Common;
 using JobApplication.Application.DTOs.Auth;
 using JobApplication.Application.Interfaces.Auth;
 using JobApplication.Domain.Entities;
@@ -41,15 +41,16 @@ namespace JobApplication.Application.Features.Auth.Command.Register
                 await _users.SaveChangesAsync();
                 user.ProfileId = candidate.Id;
             }
+            else if (request.dto.Role == UserRole.Recruiter)
+            {
+                var recruiter = new Recruiter { FullName = request.dto.FullName, Email = email };
+                await _users.InsertRecruiterAsync(recruiter);
+                await _users.SaveChangesAsync();
+                user.ProfileId = recruiter.Id;
+            }
 
             await _users.InsertAsync(user);
             await _users.SaveChangesAsync();
-
-            if (request.dto.Role == UserRole.Recruiter)
-            {
-                user.ProfileId = user.Id;
-                await _users.SaveChangesAsync();
-            }
 
             return Result<AuthResponseDto>.Ok(BuildResponse(user));
         }

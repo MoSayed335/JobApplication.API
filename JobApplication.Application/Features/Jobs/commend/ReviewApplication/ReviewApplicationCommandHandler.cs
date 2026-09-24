@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.Common;
+using JobApplication.Application.Common;
 using JobApplication.Application.DTOs;
 using JobApplication.Application.Interfaces;
 using JobApplication.Domain.Entities;
@@ -15,7 +15,6 @@ namespace JobApplication.Application.Features.Jobs.commend.ReviewApplication
     public class ReviewApplicationCommandHandler : IRequestHandler<ReviewApplicationCommand, Result<ApplicationResponseDto>>
     {
         private readonly IApplicationRepository _apps;
-        private readonly IJobRepository _jobs;
         private readonly IBackgroundJobScheduler _backgroundJobScheduler;
 
         private static readonly Dictionary<JobApplicationStatus, JobApplicationStatus[]> AllowedTransitions = new()
@@ -25,10 +24,9 @@ namespace JobApplication.Application.Features.Jobs.commend.ReviewApplication
             [JobApplicationStatus.Interview] = new[] { JobApplicationStatus.Accepted, JobApplicationStatus.Rejected },
         };
 
-        public ReviewApplicationCommandHandler(IApplicationRepository apps, IJobRepository jobs, IBackgroundJobScheduler backgroundJobScheduler)
+        public ReviewApplicationCommandHandler(IApplicationRepository apps, IBackgroundJobScheduler backgroundJobScheduler)
         {
             _apps = apps;
-            _jobs = jobs;
             _backgroundJobScheduler = backgroundJobScheduler;
         }
 
@@ -52,7 +50,14 @@ namespace JobApplication.Application.Features.Jobs.commend.ReviewApplication
             _apps.Update(app);
             await _apps.SaveChangesAsync();
 
-            _backgroundJobScheduler.Schedule<INotificationService>(s => s.NotifyRecruiter(app.Id), TimeSpan.FromMinutes(2));
+            // Fire-and-forget: Notify candidate about the status transition
+            _backgroundJobScheduler.Enqueue<INotificationService>(s => s.NotifyCandidateStatusChanged(app.Id, request.dto.NewStatus));
+
+            // Delayed job: If moved to Interview, schedule a reminder 2 minutes later
+            if (request.dto.NewStatus == JobApplicationStatus.Interview)
+            {
+                _backgroundJobScheduler.Schedule<INotificationService>(s => s.SendInterviewReminder(app.Id), TimeSpan.FromMinutes(2));
+            }
 
             return Result<ApplicationResponseDto>.Ok(Map(app));
         }

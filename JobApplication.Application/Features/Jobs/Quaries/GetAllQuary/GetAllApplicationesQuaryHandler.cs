@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.DTOs;
+using JobApplication.Application.DTOs;
 using JobApplication.Application.Interfaces;
 using JobApplication.Domain.Entities;
 using JobApplication.Domain.Enums;
@@ -14,19 +14,10 @@ namespace JobApplication.Application.Features.Jobs.Quaries.GetAllQuary
     public class GetAllApplicationesQuaryHandler : IRequestHandler<GetAllApplicationesQuary, List<ApplicationResponseDto>>
     {
         private readonly IApplicationRepository _apps;
-        private readonly IJobRepository _jobs;
 
-        private static readonly Dictionary<JobApplicationStatus, JobApplicationStatus[]> AllowedTransitions = new()
-        {
-            [JobApplicationStatus.Applied] = new[] { JobApplicationStatus.UnderReview, JobApplicationStatus.Rejected },
-            [JobApplicationStatus.UnderReview] = new[] { JobApplicationStatus.Interview, JobApplicationStatus.Rejected },
-            [JobApplicationStatus.Interview] = new[] { JobApplicationStatus.Accepted, JobApplicationStatus.Rejected },
-        };
-
-        public GetAllApplicationesQuaryHandler(IApplicationRepository apps, IJobRepository jobs)
+        public GetAllApplicationesQuaryHandler(IApplicationRepository apps)
         {
             _apps = apps;
-            _jobs = jobs;
         }
         public Task<List<ApplicationResponseDto>> Handle(GetAllApplicationesQuary request, CancellationToken cancellationToken)
         {

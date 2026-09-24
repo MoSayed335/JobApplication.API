@@ -1,4 +1,4 @@
-﻿using JobApplication.Domain.Entities;
+using JobApplication.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,6 +12,7 @@ namespace JobApplication.Application.Interfaces
         void Remove(Job job);
         IQueryable<Job> Get();
         Task<Job?> GetByIdAsync(int id);
+        Task<List<Job>> GetExpiredJobsAsync(DateTime cutoffDate, CancellationToken cancellationToken = default);
         Task SaveChangesAsync();
     }
 }

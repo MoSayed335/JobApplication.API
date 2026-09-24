@@ -17,17 +17,15 @@ namespace JobApplication.API.Controllers
     [AllowAnonymous]
     public class AuthController : ApiControllerBase
     {
-        private readonly IAuthService _auth;
         private readonly IMediator _mediator;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthController"/> class.
         /// </summary>
-        /// <param name="auth">The authentication service application interface.</param>
-        public AuthController(IAuthService auth, IMediator mediator)
+        /// <param name="mediator">The MediatR mediator instance.</param>
+        public AuthController(IMediator mediator)
         {
             _mediator = mediator;
-            _auth = auth;
         }
 
         /// <summary>

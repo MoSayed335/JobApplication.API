@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.Common;
+using JobApplication.Application.Common;
 using JobApplication.Application.DTOs.Auth;
 using MediatR;
 using System;
@@ -11,6 +11,6 @@ namespace JobApplication.Application.Features.Auth.Command.Register
 {
     public class RegisterCommand : IRequest<Result<AuthResponseDto>>
     {
-        public RegisterDto dto { get; set; }
+        public RegisterDto dto { get; set; } = null!;
     }
 }

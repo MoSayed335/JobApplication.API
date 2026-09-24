@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.Common;
+using JobApplication.Application.Common;
 using JobApplication.Application.DTOs;
 using JobApplication.Application.Interfaces;
 using JobApplication.Domain.Entities;
@@ -24,7 +24,6 @@ namespace JobApplication.Application.Features.Job.Command.CreateJob
             await _jobs.InsertAsync(job);
             await _jobs.SaveChangesAsync();
             return Result<JobResponseDto>.Ok(Map(job));
-            throw new NotImplementedException();
         }
         private static JobResponseDto Map(JobApplication.Domain.Entities.Job j) => new()
         {

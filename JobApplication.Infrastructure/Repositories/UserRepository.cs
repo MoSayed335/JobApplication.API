@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.Interfaces.Auth;
+using JobApplication.Application.Interfaces.Auth;
 using JobApplication.Domain.Entities;
 using JobApplication.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -16,5 +16,6 @@ public class UserRepository : IUserRepository
 
     public async Task InsertAsync(User user) => await _context.Users.AddAsync(user);
     public async Task InsertCandidateAsync(Candidate c) => await _context.Candidates.AddAsync(c);
+    public async Task InsertRecruiterAsync(Recruiter r) => await _context.Recruiters.AddAsync(r);
     public Task SaveChangesAsync() => _context.SaveChangesAsync();
 }

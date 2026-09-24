@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.Common;
+using JobApplication.Application.Common;
 using JobApplication.Application.DTOs;
 using JobApplication.Application.Interfaces;
 using JobApplication.Domain.Entities;
@@ -11,16 +11,15 @@ namespace JobApplication.Application.Features.Jobs.commend.Canceledapplication
      : IRequestHandler<CanceledapplicationCommand, Result<ApplicationResponseDto>>
     {
         private readonly IApplicationRepository _apps;
-
-        private readonly INotificationService _notificationService;
         private readonly IBackgroundJobScheduler _backgroundJobScheduler;
-        public CanceledapplicationCommandHandler(IApplicationRepository apps, INotificationService notificationService, IBackgroundJobScheduler backgroundJobScheduler)
+
+        public CanceledapplicationCommandHandler(IApplicationRepository apps, IBackgroundJobScheduler backgroundJobScheduler)
         {
             _apps = apps;
-            _notificationService = notificationService;
             _backgroundJobScheduler = backgroundJobScheduler;
         }
-        async Task<Result<ApplicationResponseDto>> IRequestHandler<CanceledapplicationCommand, Result<ApplicationResponseDto>>.Handle(CanceledapplicationCommand request, CancellationToken cancellationToken)
+
+        public async Task<Result<ApplicationResponseDto>> Handle(CanceledapplicationCommand request, CancellationToken cancellationToken)
         {
             var app = await _apps.GetByIdAsync(request.id);
             if (app is null)
@@ -41,9 +40,8 @@ namespace JobApplication.Application.Features.Jobs.commend.Canceledapplication
             _apps.Update(app);
             await _apps.SaveChangesAsync();
 
-            _backgroundJobScheduler.Enqueue<INotificationService>(b => b.NotifyRecruiter(app.Id));
-
-            //_backgroundJobScheduler.Schedule<INotificationService>(b => b.NotifyRecruiter(app.Id), TimeSpan.FromMinutes(2) );
+            // Fire-and-forget: Notify recruiter about candidate cancellation
+            _backgroundJobScheduler.Enqueue<INotificationService>(b => b.NotifyApplicationCancelled(app.Id));
 
             return Result<ApplicationResponseDto>.Ok(Map(app));
         }

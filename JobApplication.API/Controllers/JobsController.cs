@@ -20,18 +20,15 @@ namespace JobApplication.API.Controllers;
 [Route("api/[controller]")]
 public class JobsController : ApiControllerBase
 {
-    //private readonly IJobService _service;
-    private readonly IMediator _mentor;
+    private readonly IMediator _mediator;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="JobsController"/> class.
     /// </summary>
-    /// <param name="service">The job domain service.</param>
     /// <param name="mediator">The MediatR mediator instance.</param>
-    public JobsController(IJobService service , IMediator mediator)
+    public JobsController(IMediator mediator)
     {
-        //_service = service;
-        _mentor = mediator;
+        _mediator = mediator;
     }
 
     /// <summary>
@@ -53,7 +50,7 @@ public class JobsController : ApiControllerBase
     public async Task<IActionResult> Create(CreateJobDto dto)
     {
         //var result = await _service.CreateAsync(ProfileId, dto);
-        var result = await _mentor.Send(new CreateJobCommand() { recruiterId = ProfileId , dto = dto });
+        var result = await _mediator.Send(new CreateJobCommand() { recruiterId = ProfileId , dto = dto });
         return result.IsSuccess
             ? CreatedAtAction(nameof(GetById), new { id = result.Value!.Id }, result.Value)
             : ToError(result);
@@ -73,14 +70,13 @@ public class JobsController : ApiControllerBase
     [AllowAnonymous]
     [ProducesResponseType(typeof(IEnumerable<JobResponseDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] bool? isActive)
-        //=> Ok(await _service.GetAllAsync(isActive));
-        => Ok(await _mentor.Send(new GetAllQuary() { isActive =  isActive }));
+        => Ok(await _mediator.Send(new GetAllQuary() { isActive =  isActive }));
 
     /// <summary>
     /// Retrieves a specific job posting by its unique identifier.
     /// </summary>
     /// <remarks>
-    /// <b>Architecture Context:</b> Triggers the <c>GetByIdAsync</c> Query / Use Case via <see cref="IJobService"/> (<c>JobApplication.Application.Interfaces.IJobService</c>).
+    /// <b>Architecture Context:</b> Triggers the MediatR query <see cref="GetByIdQuery"/> (<c>JobApplication.Application.Features.Job.Quaries.GetByIdJob.GetByIdQuery</c>).
     /// 
     /// Fetches the details of a single job. This endpoint is public and does not require authentication.
     /// </remarks>
@@ -92,8 +88,7 @@ public class JobsController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(int id)
     {
-        //var result = await _service.GetByIdAsync(id);
-        var result = await _mentor.Send(new GetByIdQuery() { id = id });
+        var result = await _mediator.Send(new GetByIdQuery() { id = id });
         return result.IsSuccess ? Ok(result.Value) : ToError(result);
     }
 
@@ -101,7 +96,7 @@ public class JobsController : ApiControllerBase
     /// Updates an existing job posting (Recruiter only).
     /// </summary>
     /// <remarks>
-    /// <b>Architecture Context:</b> Triggers the <c>UpdateAsync</c> Use Case via <see cref="IJobService"/> (<c>JobApplication.Application.Interfaces.IJobService</c>).
+    /// <b>Architecture Context:</b> Triggers the MediatR command <see cref="UpdateJobCommand"/> (<c>JobApplication.Application.Features.Job.Command.UpdateJob.UpdateJobCommand</c>).
     /// 
     /// Verifies that the authenticated recruiter owns the job posting and that the job is active (closed jobs cannot be edited).
     /// </remarks>
@@ -117,8 +112,7 @@ public class JobsController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, UpdateJobDto dto)
     {
-        //var result = await _service.UpdateAsync(id, ProfileId, dto);
-        var result = await _mentor.Send(new UpdateJobCommand() { Id = id , recruiterId =ProfileId , dto = dto });
+        var result = await _mediator.Send(new UpdateJobCommand() { Id = id , recruiterId =ProfileId , dto = dto });
         return result.IsSuccess ? Ok(result.Value) : ToError(result);
     }
 
@@ -126,7 +120,7 @@ public class JobsController : ApiControllerBase
     /// Closes an active job posting to stop accepting further applications (Recruiter only).
     /// </summary>
     /// <remarks>
-    /// <b>Architecture Context:</b> Triggers the <c>CloseAsync</c> Use Case via <see cref="IJobService"/> (<c>JobApplication.Application.Interfaces.IJobService</c>).
+    /// <b>Architecture Context:</b> Triggers the MediatR command <see cref="CloseJobCommand"/> (<c>JobApplication.Application.Features.Job.Command.CloseJob.CloseJobCommand</c>).
     /// 
     /// Verifies that the authenticated recruiter owns the job. Transitions <c>IsActive</c> to <c>false</c>. Fails with a conflict error if the job is already closed.
     /// </remarks>
@@ -141,8 +135,7 @@ public class JobsController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Close(int id)
     {
-        //var result = await _service.CloseAsync(id, ProfileId);
-        var result = await _mentor.Send(new CloseJobCommand() { Id =id , recruiterId = ProfileId});
+        var result = await _mediator.Send(new CloseJobCommand() { Id =id , recruiterId = ProfileId});
         return result.IsSuccess ? Ok(result.Value) : ToError(result);
     }
 }

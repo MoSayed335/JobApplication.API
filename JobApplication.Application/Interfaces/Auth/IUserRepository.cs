@@ -1,4 +1,4 @@
-﻿using JobApplication.Domain.Entities;
+using JobApplication.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +13,7 @@ namespace JobApplication.Application.Interfaces.Auth
         Task<bool> EmailExistsAsync(string email);
         Task InsertAsync(User user);
         Task InsertCandidateAsync(Candidate candidate);
+        Task InsertRecruiterAsync(Recruiter recruiter);
         Task SaveChangesAsync();
     }
 }

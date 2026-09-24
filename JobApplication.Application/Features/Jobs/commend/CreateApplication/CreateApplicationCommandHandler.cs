@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.Common;
+using JobApplication.Application.Common;
 using JobApplication.Application.DTOs;
 using JobApplication.Application.Interfaces;
 using JobApplication.Domain.Entities;
@@ -16,19 +16,18 @@ namespace JobApplication.Application.Features.Jobs.commend.CreateApplication
     {
         private readonly IApplicationRepository _apps;
         private readonly IJobRepository _jobs;
+        private readonly IBackgroundJobScheduler _backgroundJobScheduler;
 
-        private static readonly Dictionary<JobApplicationStatus, JobApplicationStatus[]> AllowedTransitions = new()
-        {
-            [JobApplicationStatus.Applied] = new[] { JobApplicationStatus.UnderReview, JobApplicationStatus.Rejected },
-            [JobApplicationStatus.UnderReview] = new[] { JobApplicationStatus.Interview, JobApplicationStatus.Rejected },
-            [JobApplicationStatus.Interview] = new[] { JobApplicationStatus.Accepted, JobApplicationStatus.Rejected },
-        };
-
-        public CreateApplicationCommandHandler(IApplicationRepository apps, IJobRepository jobs)
+        public CreateApplicationCommandHandler(
+            IApplicationRepository apps,
+            IJobRepository jobs,
+            IBackgroundJobScheduler backgroundJobScheduler)
         {
             _apps = apps;
             _jobs = jobs;
+            _backgroundJobScheduler = backgroundJobScheduler;
         }
+
         public async Task<Result<ApplicationResponseDto>> Handle(CreateApplicationCommand request, CancellationToken cancellationToken)
         {
             var job = await _jobs.GetByIdAsync(request.Dto.JobId);
@@ -53,6 +52,9 @@ namespace JobApplication.Application.Features.Jobs.commend.CreateApplication
 
             await _apps.InsertAsync(app);
             await _apps.SaveChangesAsync();
+
+            // Fire-and-forget: Asynchronously notify the recruiter of the new application
+            _backgroundJobScheduler.Enqueue<INotificationService>(s => s.NotifyRecruiter(app.Id));
 
             return Result<ApplicationResponseDto>.Ok(Map(app));
         }

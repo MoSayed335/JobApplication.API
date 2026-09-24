@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.Common;
+using JobApplication.Application.Common;
 using JobApplication.Application.DTOs;
 using MediatR;
 using System;
@@ -13,6 +13,6 @@ namespace JobApplication.Application.Features.Job.Command.CreateJob
     {
         public int recruiterId { get; set; }
 
-        public CreateJobDto dto { get; set; }
+        public CreateJobDto dto { get; set; } = null!;
     }
 }

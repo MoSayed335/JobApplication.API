@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.Common;
+using JobApplication.Application.Common;
 using JobApplication.Application.DTOs;
 using MediatR;
 using System;
@@ -13,7 +13,7 @@ namespace JobApplication.Application.Features.Jobs.commend.ReviewApplication
     {
         public int id { get; set; }
         public int recruiterId { get; set; }
-        public ReviewApplicationDto dto { get; set; }
+        public ReviewApplicationDto dto { get; set; } = null!;
 
     }
 }

@@ -1,11 +1,9 @@
-﻿using JobApplication.Application.Common;
+using JobApplication.Application.Common;
 using JobApplication.Application.DTOs;
 using JobApplication.Application.Interfaces;
 using JobApplication.Domain.Entities;
 using MediatR;
-using static System.Reflection.Metadata.BlobBuilder;
 
-//Job = JobApplication.Domain.Entities.Job;
 
 
 namespace JobApplication.Application.Features.Job.Command.CloseJob
@@ -34,7 +32,6 @@ namespace JobApplication.Application.Features.Job.Command.CloseJob
             job.IsActive = false;
             await _jobs.SaveChangesAsync();
             return Result<JobResponseDto>.Ok(Map(job));
-            throw new NotImplementedException();
         }
         private static JobResponseDto Map(JobApplication.Domain.Entities.Job j) => new()
         {

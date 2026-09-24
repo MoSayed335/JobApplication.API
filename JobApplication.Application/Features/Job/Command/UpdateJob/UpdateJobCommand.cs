@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.Common;
+using JobApplication.Application.Common;
 using JobApplication.Application.DTOs;
 using MediatR;
 using System;
@@ -14,6 +14,6 @@ namespace JobApplication.Application.Features.Job.Command.UpdateJob
         public int Id { get; set; }
         public int recruiterId { get; set; }
 
-        public UpdateJobDto dto { get; set; }
+        public UpdateJobDto dto { get; set; } = null!;
     }
 }
