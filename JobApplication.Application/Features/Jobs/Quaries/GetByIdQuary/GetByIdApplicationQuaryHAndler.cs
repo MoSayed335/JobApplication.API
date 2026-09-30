@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace JobApplication.Application.Features.Jobs.Quaries.GetByIdQuary
 {
-    internal class GetByIdApplicationQuaryHAndler
+    public class GetByIdApplicationQuaryHAndler
     {
     }
 }
